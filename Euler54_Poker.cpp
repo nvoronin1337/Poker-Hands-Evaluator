@@ -6,9 +6,32 @@
 #include <vector>
 #include <sstream>
 #include <iostream>
+#include <chrono>
+#include <thread>
 
-constexpr auto VERBOSE_MODE = 1;
+constexpr auto VERBOSE_MODE = 0;
 constexpr auto FIND_COMBINATION_VERBOSE = 0;
+
+namespace timer_utility {
+	struct Timer {
+		std::chrono::time_point<std::chrono::steady_clock> start, end;
+		std::chrono::duration<float> duration;
+
+		Timer() {
+			start = std::chrono::high_resolution_clock::now();
+		}
+
+		~Timer() {
+			end = std::chrono::high_resolution_clock::now();
+			duration = end - start;
+
+			float ms = duration.count() * 1000.0f;
+			std::cout << "Time elapsed: " << ms << " ms\n";
+		}
+	};
+	
+
+}
 
 namespace poker_utility {
 	constexpr auto FILE_NAME = "poker_hands.txt";
@@ -21,9 +44,9 @@ namespace poker_utility {
 	{
 		bool operator()(const char& lhs, const char& rhs) const
 		{
-				int lhs_value = rank_to_int_map.find(lhs)->second;
-				int rhs_value = rank_to_int_map.find(rhs)->second;
-				return lhs_value > rhs_value;	
+			int lhs_value = rank_to_int_map.find(lhs)->second;
+			int rhs_value = rank_to_int_map.find(rhs)->second;
+			return lhs_value > rhs_value;
 		}
 	};
 
@@ -88,6 +111,7 @@ namespace poker_utility {
 			}
 			return 'z';
 		}
+
 		rank has_straight(const occurencies_map& oc_map) {
 			if (oc_map.size() == 5) {
 				auto begin_it = oc_map.begin();
@@ -156,12 +180,12 @@ namespace poker_utility {
 
 		Combination find_combination(occurencies_map& oc_map) {
 			// from most powerfull to least powerfull
-			rank flush = poker_utility::combinations_finder::has_flush(oc_map);
-			rank straight = poker_utility::combinations_finder::has_straight(oc_map);
-			rank four = poker_utility::combinations_finder::has_four(oc_map);
-			std::pair<rank, rank> two_pairs = poker_utility::combinations_finder::has_two_pairs(oc_map);
-			rank three = poker_utility::combinations_finder::has_three(oc_map);
-			rank pair = poker_utility::combinations_finder::has_pair(oc_map);
+			rank flush = has_flush(oc_map);
+			rank straight = has_straight(oc_map);
+			rank four = has_four(oc_map);
+			std::pair<rank, rank> two_pairs = has_two_pairs(oc_map);
+			rank three = has_three(oc_map);
+			rank pair = has_pair(oc_map);
 
 			if (flush != 'z' && straight != 'z') {
 				if (straight == 'A') {
@@ -291,6 +315,7 @@ namespace poker_utility {
 
 
 void parse_file(const std::string& _FILE_NAME) {
+	timer_utility::Timer timer;
 	std::string buffer;
 	std::ifstream in(_FILE_NAME);
 	if (in.is_open()) {
