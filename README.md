@@ -1,4 +1,4 @@
-# Eulers_Poker_Challange
+# Eulers_Poker_Challenge
 Euler54 : https://projecteuler.net/problem=54
 
 In the card game poker, a hand consists of five cards and are ranked, from lowest to highest, in the following way:
